@@ -1,17 +1,22 @@
 package tech.ada.queroserdev.service.professor;
 
-import tech.ada.queroserdev.domain.dto.ProfessorDto;
+import tech.ada.queroserdev.domain.dto.v1.ProfessorDto;
+import tech.ada.queroserdev.domain.dto.exception.NotFoundException;
 
 import java.util.List;
 
 public interface IProfessorService {
 
-    void criarProfessor(String nome, String email);
+    ProfessorDto criarProfessor(ProfessorDto professorDto);
 
     List<ProfessorDto> listarProfessor();
 
-    ProfessorDto buscarProfessorPorId(int id);
+    ProfessorDto buscarProfessor(int id) throws NotFoundException;
 
-    ProfessorDto atualizarProfessor(int id, String nome, String email);
+    ProfessorDto substituirProfessor(int id, ProfessorDto professorDto) throws NotFoundException;
+
+    ProfessorDto atualizarProfessor(int id, ProfessorDto professorDto) throws NotFoundException;
+
+    void deletarProfessor(int id) throws NotFoundException;
 
 }

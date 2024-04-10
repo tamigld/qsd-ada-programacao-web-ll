@@ -1,11 +1,11 @@
 package tech.ada.queroserdev.service.professor;
 
 import org.springframework.stereotype.Service;
-import tech.ada.queroserdev.domain.dto.ProfessorDto;
+import tech.ada.queroserdev.domain.dto.v1.ProfessorDto;
+import tech.ada.queroserdev.domain.dto.exception.NotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ProfessorService implements IProfessorService {
@@ -13,9 +13,15 @@ public class ProfessorService implements IProfessorService {
     private int id = 0;
 
     @Override
-    public void criarProfessor(String nome, String email) {
-        professores.add(new ProfessorDto(id, nome, email));
-        id++;
+    public ProfessorDto criarProfessor(ProfessorDto professorDto) {
+        final ProfessorDto p = new ProfessorDto(
+                id++,
+                professorDto.getNome(),
+                professorDto.getEmail()
+        );
+
+        professores.add(p);
+        return p;
     }
 
     @Override
@@ -24,24 +30,38 @@ public class ProfessorService implements IProfessorService {
     }
 
     @Override
-    public ProfessorDto buscarProfessorPorId(int id) {
-        Optional<ProfessorDto> professor = professores
+    public ProfessorDto buscarProfessor(int id) throws NotFoundException {
+        return professores
                 .stream()
-                .filter(it -> it.getId() == id)
-                .findFirst();
-        return professor.orElse(null);
+                .filter(p -> p.getId() == id)
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException(ProfessorDto.class, String.valueOf(id)));
     }
 
     @Override
-    public ProfessorDto atualizarProfessor(int id, String nome, String email) {
-        Optional<ProfessorDto> professor = professores
-                .stream()
-                .filter(it -> it.getId() == id)
-                .findFirst();
-        if (professor.isPresent()) {
-            professores.remove(professor.get());
-            professores.add(new ProfessorDto(id, nome, email));
-        }
-        return null;
+    public ProfessorDto substituirProfessor(int id, ProfessorDto professorDto) throws NotFoundException {
+        final ProfessorDto professor = buscarProfessor(id);
+
+        professores.remove(professor);
+        ProfessorDto novoProfessor = new ProfessorDto(professor.getId(), professorDto.getNome(), professorDto.getEmail());
+        professores.add(novoProfessor);
+
+        return novoProfessor;
+    }
+
+    @Override
+    public ProfessorDto atualizarProfessor(int id, ProfessorDto professorDto) throws NotFoundException {
+        final ProfessorDto professor = buscarProfessor(id);
+        professor.setId(professorDto.getId() != 0 ? professor.getId() : 0);
+        professor.setNome(professorDto.getNome() == null ? professor.getNome() : professorDto.getNome());
+        professor.setEmail(professorDto.getEmail() == null ? professor.getEmail() : professorDto.getEmail());
+
+        return professor;
+    }
+
+    @Override
+    public void deletarProfessor(int id) throws NotFoundException {
+        final ProfessorDto professor = buscarProfessor(id);
+        professores.remove(professor);
     }
 }
