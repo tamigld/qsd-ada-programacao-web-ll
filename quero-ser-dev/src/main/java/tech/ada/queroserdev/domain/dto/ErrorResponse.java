@@ -1,7 +1,6 @@
 package tech.ada.queroserdev.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import tech.ada.queroserdev.domain.dto.exception.CustomMessageException;

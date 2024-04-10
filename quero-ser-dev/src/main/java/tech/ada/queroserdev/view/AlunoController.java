@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tech.ada.queroserdev.domain.dto.exception.CustomMessageException;
 import tech.ada.queroserdev.domain.dto.exception.NotFoundException;
+import tech.ada.queroserdev.domain.dto.exception.UniqueException;
 import tech.ada.queroserdev.domain.dto.v1.AlunoDto;
 import tech.ada.queroserdev.service.aluno.IAlunoService;
 
@@ -43,7 +44,7 @@ public class AlunoController {
     @PostMapping
     public ResponseEntity<AlunoDto> cadastrarAluno(
             @RequestBody @Valid AlunoDto aluno
-    ) {
+    ) throws UniqueException {
         if(aluno.getNome().length() < 3){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
