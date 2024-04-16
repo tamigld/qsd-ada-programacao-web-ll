@@ -1,9 +1,13 @@
 package tech.ada.queroserdev.domain.dto.v1;
 
+import jakarta.validation.constraints.Null;
+import org.hibernate.validator.constraints.br.CPF;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,10 +19,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @JsonIgnoreProperties
 public class ProfessorDto {
+    @Positive
     private int id;
     @NotBlank
-    @Min(value = 3, message = "O nome deve conter mais de 2 caracteres.")
     private String nome;
-    @Email(message = "E-mail com formatação errada.")
+    @CPF
+    private String cpf;
+    @Email
     private String email;
+    @Null
+    private String activity;
 }

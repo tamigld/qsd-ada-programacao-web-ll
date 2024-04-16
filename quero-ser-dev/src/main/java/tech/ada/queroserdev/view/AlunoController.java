@@ -5,13 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import tech.ada.queroserdev.domain.dto.exception.CustomMessageException;
 import tech.ada.queroserdev.domain.dto.exception.NotFoundException;
 import tech.ada.queroserdev.domain.dto.exception.UniqueException;
 import tech.ada.queroserdev.domain.dto.v1.AlunoDto;
 import tech.ada.queroserdev.service.aluno.IAlunoService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -26,7 +24,7 @@ public class AlunoController {
     @GetMapping
     public ResponseEntity<List<AlunoDto>> listarAlunos(
             @RequestParam(required = false) String turma
-    ) throws NotFoundException, CustomMessageException {
+    ) throws NotFoundException {
         if(turma == null){
             return ResponseEntity.ok(alunoService.listarAlunos());
         } else{
@@ -36,7 +34,7 @@ public class AlunoController {
 
     @GetMapping("/{id}")
     public ResponseEntity<AlunoDto> buscarAlunoPorId(
-            @PathVariable int id
+            @PathVariable("id") int id
     ) throws NotFoundException {
         return ResponseEntity.ok(alunoService.buscarAlunoPorId(id));
     }
@@ -62,7 +60,7 @@ public class AlunoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AlunoDto> atualizarAluno(
+    public ResponseEntity<AlunoDto> substituirAluno(
             @PathVariable("id") int id,
             @RequestBody AlunoDto aluno
     ) throws NotFoundException {

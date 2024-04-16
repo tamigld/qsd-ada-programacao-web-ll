@@ -1,31 +1,41 @@
 package tech.ada.queroserdev.service.professor;
 
-import org.springframework.stereotype.Service;
-import tech.ada.queroserdev.domain.dto.v1.ProfessorDto;
-import tech.ada.queroserdev.domain.dto.exception.NotFoundException;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import tech.ada.queroserdev.domain.dto.exception.NotFoundException;
+import tech.ada.queroserdev.domain.dto.v1.ProfessorDto;
+import tech.ada.queroserdev.external.RestBoredApi;
+
 @Service
 public class ProfessorService implements IProfessorService {
+
     private final List<ProfessorDto> professores = new ArrayList<>();
-    private int id = 0;
+    private final RestBoredApi boredApi;
+    private int id = 1;
+
+    public ProfessorService(RestBoredApi boredApi) {
+        this.boredApi = boredApi;
+    }
 
     @Override
-    public ProfessorDto criarProfessor(ProfessorDto professorDto) {
+    public ProfessorDto criarProfessor(ProfessorDto novoProfessor) {
         final ProfessorDto p = new ProfessorDto(
                 id++,
-                professorDto.getNome(),
-                professorDto.getEmail()
+                novoProfessor.getNome(),
+                novoProfessor.getCpf(),
+                novoProfessor.getEmail(),
+                boredApi.activity()
         );
-
         professores.add(p);
         return p;
     }
 
     @Override
-    public List<ProfessorDto> listarProfessor() {
+    public List<ProfessorDto> listarProfessores() {
         return professores;
     }
 
@@ -33,35 +43,31 @@ public class ProfessorService implements IProfessorService {
     public ProfessorDto buscarProfessor(int id) throws NotFoundException {
         return professores
                 .stream()
-                .filter(p -> p.getId() == id)
+                .filter(it -> it.getId()==id)
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException(ProfessorDto.class, String.valueOf(id)));
     }
 
     @Override
-    public ProfessorDto substituirProfessor(int id, ProfessorDto professorDto) throws NotFoundException {
-        final ProfessorDto professor = buscarProfessor(id);
-
+    public ProfessorDto atualizarProfessor(int id, ProfessorDto pedido) {
+        final ProfessorDto professor = professores.stream().filter(it -> it.getId() == id).findFirst().orElse(null);
+        if (professor == null) {
+            return null;
+        }
         professores.remove(professor);
-        ProfessorDto novoProfessor = new ProfessorDto(professor.getId(), professorDto.getNome(), professorDto.getEmail());
-        professores.add(novoProfessor);
-
-        return novoProfessor;
+        final ProfessorDto p = new ProfessorDto(professor.getId(), pedido.getNome(), pedido.getCpf(), pedido.getEmail(), boredApi.activity());
+        professores.add(p);
+        return p;
     }
 
     @Override
-    public ProfessorDto atualizarProfessor(int id, ProfessorDto professorDto) throws NotFoundException {
+    public void removerProfessor(int id) throws NotFoundException {
         final ProfessorDto professor = buscarProfessor(id);
-        professor.setId(professorDto.getId() != 0 ? professor.getId() : 0);
-        professor.setNome(professorDto.getNome() == null ? professor.getNome() : professorDto.getNome());
-        professor.setEmail(professorDto.getEmail() == null ? professor.getEmail() : professorDto.getEmail());
-
-        return professor;
+        professores.remove(professor);
     }
 
     @Override
-    public void deletarProfessor(int id) throws NotFoundException {
-        final ProfessorDto professor = buscarProfessor(id);
-        professores.remove(professor);
+    public ProfessorDto buscarPorCpf(String cpf) throws NotFoundException {
+        return null;
     }
 }

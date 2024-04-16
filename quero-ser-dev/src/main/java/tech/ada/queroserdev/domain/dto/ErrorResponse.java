@@ -3,7 +3,6 @@ package tech.ada.queroserdev.domain.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import tech.ada.queroserdev.domain.dto.exception.CustomMessageException;
 import tech.ada.queroserdev.domain.dto.exception.NotFoundException;
 import tech.ada.queroserdev.domain.dto.exception.UniqueException;
 
@@ -26,7 +25,7 @@ public class ErrorResponse {
     }
 
     public static ErrorResponse createFromException(NotFoundException ex){
-        String message = "No record of " + ex.getClazz().getSimpleName() + " found for id " + ex.getId();
+        String message = "No record of " + ex.getClazz().getSimpleName() + " found for id " + ex.getSearchValue();
         return new ErrorResponse(message);
     }
 
@@ -45,8 +44,4 @@ public class ErrorResponse {
         return new ErrorResponse(message);
     }
 
-    public static ErrorResponse createMessageFromException(CustomMessageException cme){
-        String message = cme.getMessage();
-        return new ErrorResponse(message);
-    }
 }

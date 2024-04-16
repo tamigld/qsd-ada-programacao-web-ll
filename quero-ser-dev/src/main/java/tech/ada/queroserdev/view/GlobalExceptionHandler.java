@@ -6,11 +6,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import tech.ada.queroserdev.domain.dto.ErrorResponse;
-import tech.ada.queroserdev.domain.dto.exception.CustomMessageException;
 import tech.ada.queroserdev.domain.dto.exception.NotFoundException;
 import tech.ada.queroserdev.domain.dto.exception.UniqueException;
-
-import java.io.NotActiveException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -20,17 +17,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handeConstraintViolationException(final MethodArgumentNotValidException ex) {
+    public ResponseEntity<ErrorResponse> handleConstraintViolationException(final MethodArgumentNotValidException ex) {
         return ResponseEntity.badRequest().body(ErrorResponse.createFromException(ex));
     }
 
     @ExceptionHandler(value = UniqueException.class)
     public ResponseEntity<ErrorResponse> handleUniqueException(final UniqueException exception){
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorResponse.createFromException(exception));
-    }
-
-    @ExceptionHandler(value = CustomMessageException.class)
-    public ResponseEntity<ErrorResponse> handleCustomMessageException(final CustomMessageException exception){
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponse.createMessageFromException(exception));
     }
 }

@@ -7,5 +7,5 @@ import lombok.Getter;
 @AllArgsConstructor
 public class NotFoundException extends Exception {
     private final Class clazz;
-    private final String id;
+    private final String searchValue;
 }
