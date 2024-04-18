@@ -1,8 +1,6 @@
 package tech.ada.queroserdev.domain.entities;
 
 import jakarta.persistence.*;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
+import java.util.Date;
 
 @Builder
 @Data
@@ -27,9 +26,6 @@ public class Aluno {
     private String email;
 
     private String turma;
-
-    @Column(unique = true)
-    private String cpf;
 
     @Column(unique = true)
     private String matricula;

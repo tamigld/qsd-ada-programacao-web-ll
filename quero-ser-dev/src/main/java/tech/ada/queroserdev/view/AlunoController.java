@@ -1,6 +1,7 @@
 package tech.ada.queroserdev.view;
 
 import jakarta.validation.Valid;
+import jakarta.websocket.server.PathParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import tech.ada.queroserdev.domain.dto.exception.NotFoundException;
 import tech.ada.queroserdev.domain.dto.exception.UniqueException;
 import tech.ada.queroserdev.domain.dto.v1.AlunoDto;
+import tech.ada.queroserdev.domain.entities.Aluno;
+import tech.ada.queroserdev.domain.mappers.AlunoMapper;
 import tech.ada.queroserdev.service.aluno.IAlunoService;
 
 import java.util.List;
@@ -23,54 +26,85 @@ public class AlunoController {
 
     @GetMapping
     public ResponseEntity<List<AlunoDto>> listarAlunos(
-            @RequestParam(required = false) String turma
+    ) {
+        return ResponseEntity.ok(alunoService.listarAlunos());
+    }
+
+    @GetMapping("/matricula/{matricula}")
+    public ResponseEntity<AlunoDto> listarPorMatricula(
+            @PathVariable("matricula") String matricula
     ) throws NotFoundException {
-        if(turma == null){
-            return ResponseEntity.ok(alunoService.listarAlunos());
-        } else{
-            return ResponseEntity.status(HttpStatus.FOUND).body(alunoService.buscarTurma(turma));
+        if (matricula != null) {
+            return ResponseEntity
+                    .status(HttpStatus.FOUND)
+                    .body(AlunoMapper.toDto(alunoService.buscarPorMatricula(matricula)));
         }
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+
+    @GetMapping("/turma/{turma}")
+    public ResponseEntity<List<AlunoDto>> listarAlunosPorTurma(
+            @PathVariable("turma") String turma
+    ) throws NotFoundException {
+        if (turma != null) {
+            return ResponseEntity
+                    .status(HttpStatus.FOUND)
+                    .body(alunoService.buscarPorTurma(turma));
+        }
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<AlunoDto> buscarAlunoPorId(
             @PathVariable("id") int id
     ) throws NotFoundException {
-        return ResponseEntity.ok(alunoService.buscarAlunoPorId(id));
+        return ResponseEntity.ok(AlunoMapper.toDto(alunoService.buscarAlunoPorId(id)));
     }
 
     @PostMapping
     public ResponseEntity<AlunoDto> cadastrarAluno(
             @RequestBody @Valid AlunoDto aluno
     ) throws UniqueException {
-        if(aluno.getNome().length() < 3){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-
         AlunoDto alunoDto = alunoService.criarAluno(aluno);
         return ResponseEntity.status(HttpStatus.CREATED).body(alunoDto);
-    }
-
-    @PatchMapping("/{id}")
-    public AlunoDto atualizarProfessor(
-            @PathVariable("id") int id,
-            @RequestBody AlunoDto alunoDto
-    ) throws NotFoundException {
-        return alunoService.atualizarAluno(id, alunoDto);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<AlunoDto> substituirAluno(
             @PathVariable("id") int id,
-            @RequestBody AlunoDto aluno
+            @RequestBody @Valid AlunoDto alunoDto
     ) throws NotFoundException {
-        AlunoDto alunoEncontrado = alunoService.buscarAlunoPorId(id);
+        AlunoDto aluno = alunoService.substituirAluno(id, alunoDto);
 
-        if(alunoEncontrado == null){
+        if(aluno == null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        alunoService.substituirAluno(id, aluno);
         return ResponseEntity.status(HttpStatus.OK).body(aluno);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<AlunoDto> atualizarAluno(
+            @PathVariable("id") int id,
+            @RequestBody AlunoDto alunoDto
+    ) throws UniqueException, NotFoundException {
+        AlunoDto aluno = alunoService.atualizarAluno(id, alunoDto);
+
+        if(aluno == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(aluno);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<AlunoDto> deletarAluno(
+            @PathVariable("id") int id
+    ) throws NotFoundException {
+        alunoService.deletarAluno(id);
+
+        return  ResponseEntity.status(HttpStatus.OK).build();
     }
 }

@@ -11,6 +11,7 @@ import tech.ada.queroserdev.domain.dto.exception.NotFoundException;
 import tech.ada.queroserdev.domain.dto.v1.ProfessorDto;
 import tech.ada.queroserdev.domain.entities.Professor;
 import tech.ada.queroserdev.domain.mappers.ProfessorMapper;
+import tech.ada.queroserdev.external.FeignBoredApi;
 import tech.ada.queroserdev.external.RestBoredApi;
 import tech.ada.queroserdev.repositories.ProfessorRepository;
 
@@ -20,13 +21,13 @@ import tech.ada.queroserdev.repositories.ProfessorRepository;
 public class ProfessorServicoBD implements IProfessorService {
 
     private final  ProfessorRepository repositorio;
-    private final RestBoredApi boredApi;
+    private final FeignBoredApi boredApi;
 
 
     @Override
     public ProfessorDto criarProfessor(ProfessorDto pedido) {
 
-        Professor p = ProfessorMapper.toEntity(pedido, boredApi.activity());
+        Professor p = ProfessorMapper.toEntity(pedido, boredApi.getActivity().activity());
 
         return ProfessorMapper.toDto(repositorio.save(p));
 
@@ -49,9 +50,11 @@ public class ProfessorServicoBD implements IProfessorService {
     @Override
     public ProfessorDto atualizarProfessor(int id, ProfessorDto pedido) throws NotFoundException {
         final Professor p = buscarProfessorPorId(id);
+
         p.setCpf(pedido.getCpf());
         p.setNome(pedido.getNome());
         p.setEMail(pedido.getEmail());
+
         return ProfessorMapper.toDto(repositorio.save(p));
     }
 

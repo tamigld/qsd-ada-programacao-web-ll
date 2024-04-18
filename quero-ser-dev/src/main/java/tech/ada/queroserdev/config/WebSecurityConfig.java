@@ -49,9 +49,25 @@ public class WebSecurityConfig {
                                 new AntPathRequestMatcher("/v3/api-docs/**"),
                                 new AntPathRequestMatcher("/h2-console/**")
                         ))).permitAll()
-                        .requestMatchers(antMatcher(HttpMethod.GET, "/professor/**")).permitAll())
-                .authorizeHttpRequests(r -> r.requestMatchers(antMatcher(HttpMethod.POST, "/professor/**")).hasAnyRole("ADMIN")
-                        .anyRequest().authenticated())
+                        .requestMatchers(antMatcher(HttpMethod.GET, "/professor/**")).permitAll()
+                )
+
+                .authorizeHttpRequests(r -> r
+                        .requestMatchers(HttpMethod.GET,"/aluno/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/aluno/turma/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/aluno/matricula/**").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/aluno/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT,"/aluno/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH,"/aluno/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE,"/aluno/**").hasRole("ADMIN")
+                )
+
+
+                .authorizeHttpRequests(r -> r.requestMatchers(antMatcher(HttpMethod.POST, "/professor/**"))
+                        .hasAnyRole("ADMIN")
+                        .anyRequest().authenticated()
+                )
+
                 .httpBasic(Customizer.withDefaults())
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
 

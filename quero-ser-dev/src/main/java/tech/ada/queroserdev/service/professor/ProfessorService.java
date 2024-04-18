@@ -8,18 +8,21 @@ import org.springframework.stereotype.Service;
 
 import tech.ada.queroserdev.domain.dto.exception.NotFoundException;
 import tech.ada.queroserdev.domain.dto.v1.ProfessorDto;
+import tech.ada.queroserdev.external.FeignBoredApi;
 import tech.ada.queroserdev.external.RestBoredApi;
 
 @Service
 public class ProfessorService implements IProfessorService {
 
     private final List<ProfessorDto> professores = new ArrayList<>();
-    private final RestBoredApi boredApi;
+
+    private final FeignBoredApi boredApi;
     private int id = 1;
 
-    public ProfessorService(RestBoredApi boredApi) {
+    public ProfessorService(FeignBoredApi boredApi) {
         this.boredApi = boredApi;
     }
+
 
     @Override
     public ProfessorDto criarProfessor(ProfessorDto novoProfessor) {
@@ -28,7 +31,7 @@ public class ProfessorService implements IProfessorService {
                 novoProfessor.getNome(),
                 novoProfessor.getCpf(),
                 novoProfessor.getEmail(),
-                boredApi.activity()
+                boredApi.getActivity().activity()
         );
         professores.add(p);
         return p;
@@ -55,7 +58,7 @@ public class ProfessorService implements IProfessorService {
             return null;
         }
         professores.remove(professor);
-        final ProfessorDto p = new ProfessorDto(professor.getId(), pedido.getNome(), pedido.getCpf(), pedido.getEmail(), boredApi.activity());
+        final ProfessorDto p = new ProfessorDto(professor.getId(), pedido.getNome(), pedido.getCpf(), pedido.getEmail(), boredApi.getActivity().activity());
         professores.add(p);
         return p;
     }

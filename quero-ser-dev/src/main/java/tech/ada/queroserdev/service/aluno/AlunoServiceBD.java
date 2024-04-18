@@ -1,44 +1,55 @@
 package tech.ada.queroserdev.service.aluno;
 
-import jakarta.validation.Valid;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import tech.ada.queroserdev.domain.dto.exception.NotFoundException;
+import tech.ada.queroserdev.domain.dto.exception.UniqueException;
 import tech.ada.queroserdev.domain.dto.v1.AlunoDto;
 import tech.ada.queroserdev.domain.entities.Aluno;
 import tech.ada.queroserdev.domain.mappers.AlunoMapper;
+import tech.ada.queroserdev.domain.mappers.ProfessorMapper;
+import tech.ada.queroserdev.external.RestBoredApi;
 import tech.ada.queroserdev.repositories.AlunoRepository;
+import tech.ada.queroserdev.utils.MatriculaUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 @Service
 @Primary
 public class AlunoServiceBD implements IAlunoService{
     private final AlunoRepository repository;
+    private RestBoredApi restBoredApi;
 
-    public AlunoServiceBD(AlunoRepository alunoRepository) {
+    public AlunoServiceBD(AlunoRepository alunoRepository, RestBoredApi restBoredApi) {
         this.repository = alunoRepository;
+        this.restBoredApi = restBoredApi;
     }
 
     @Override
-    public AlunoDto criarAluno(AlunoDto alunoDto){
+    public AlunoDto criarAluno(AlunoDto alunoDto) throws UniqueException {
+        int matricula = MatriculaUtils.gerarMatriculaUnica();
 
-        Aluno a = AlunoMapper.toEntity(alunoDto);
+        if(repository.findByMatricula(String.valueOf(alunoDto.getMatricula())).isPresent()){
+            throw new UniqueException("matricula", String.valueOf(alunoDto.getMatricula()));
+        }
+
+        Aluno a = AlunoMapper.toEntity(alunoDto, String.valueOf(matricula));
         return AlunoMapper.toDto(repository.save(a));
 
     }
 
     @Override
-    public AlunoDto buscarAlunoPorId(int id) throws NotFoundException {
-        return AlunoMapper
-                .toDto(repository
-                        .findById(id)
-                        .orElseThrow(() -> new NotFoundException(Aluno.class, String.valueOf(id))));
+    public Aluno buscarAlunoPorId(int id) throws NotFoundException {
+        return repository
+                .findById(id)
+                .orElseThrow(() -> new NotFoundException(Aluno.class, String.valueOf(id)));
     }
 
     @Override
-    public List<AlunoDto> buscarTurma(String turma) throws NotFoundException {
+    public List<AlunoDto> buscarPorTurma(String turma) throws NotFoundException {
         List<Aluno> listaAlunos = repository.findAll().stream().toList();
 
         List<AlunoDto> alunosFiltrados = new ArrayList<>();
@@ -57,21 +68,52 @@ public class AlunoServiceBD implements IAlunoService{
     }
 
     @Override
-    public List<AlunoDto> listarAlunos() {
+    public Aluno buscarPorMatricula(String matricula) throws NotFoundException {
         return repository
-                .findAll()
-                .stream()
-                .map(AlunoMapper::toDto)
-                .toList();
+                .findByMatricula(matricula)
+                .orElseThrow(() -> new NotFoundException(AlunoDto.class, "matricula " + matricula));
+    }
+
+    @Override
+    public List<AlunoDto> listarAlunos() {
+        return repository.findAll().stream().map(AlunoMapper::toDto).toList();
     }
 
     @Override
     public AlunoDto substituirAluno(int id, AlunoDto alunoDto) throws NotFoundException {
-        return null;
+        Aluno a = buscarAlunoPorId(id);
+
+        a.setId(id);
+        a.setNome(alunoDto.getNome());
+        a.setTurma(alunoDto.getTurma());
+        a.setEmail(alunoDto.getEmail());
+        a.setMatricula(alunoDto.getMatricula() == null ? a.getMatricula() : String.valueOf(MatriculaUtils.gerarMatriculaUnica()));
+
+        return AlunoMapper.toDto(repository.save(a));
     }
 
     @Override
-    public AlunoDto atualizarAluno(int id, AlunoDto alunoDto) throws NotFoundException {
-        return null;
+    public AlunoDto atualizarAluno(int id, AlunoDto alunoDto) throws NotFoundException, UniqueException {
+        Aluno a = buscarAlunoPorId(id);
+
+        if(repository.findByMatricula(alunoDto.getMatricula()).isPresent()){
+            throw new UniqueException("matricula", String.valueOf(id));
+        }
+
+        a.setNome(alunoDto.getNome() == null ? a.getNome() : alunoDto.getNome());
+        a.setTurma(alunoDto.getTurma() == null ? a.getTurma() : alunoDto.getTurma());
+        a.setEmail(alunoDto.getEmail() == null ? a.getEmail() : alunoDto.getEmail());
+        a.setMatricula(alunoDto.getMatricula() == null ? a.getMatricula() : String.valueOf(MatriculaUtils.gerarMatriculaUnica()));
+
+        return AlunoMapper.toDto(repository.save(a));
+    }
+
+    @Override
+    public void deletarAluno(int id) throws NotFoundException {
+        if(repository.findById(id).isEmpty()){
+            throw new NotFoundException(AlunoDto.class, String.valueOf(id));
+        }
+
+        repository.deleteById(id);
     }
 }

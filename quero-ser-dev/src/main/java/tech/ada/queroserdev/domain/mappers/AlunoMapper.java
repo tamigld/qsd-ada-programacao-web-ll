@@ -5,17 +5,16 @@ import tech.ada.queroserdev.domain.dto.v1.AlunoDto;
 import tech.ada.queroserdev.domain.entities.Aluno;
 
 public class AlunoMapper {
-    public static Aluno toEntity(AlunoDto alunoDto){
+    public static Aluno toEntity(AlunoDto alunoDto, String matricula){
         return Aluno
                 .builder()
                 .nome(alunoDto.getNome())
                 .email(alunoDto.getEmail())
-                .cpf(alunoDto.getCpf())
                 .turma(alunoDto.getTurma())
-                .matricula(alunoDto.getMatricula())
+                .matricula(matricula)
                 .build();
     }
     public static AlunoDto toDto(Aluno aluno){
-        return new AlunoDto(aluno.getId(), aluno.getNome(), aluno.getEmail(), aluno.getTurma(), aluno.getCpf(), aluno.getMatricula());
+        return new AlunoDto(aluno.getId(), aluno.getNome(), aluno.getEmail(), aluno.getTurma(), aluno.getMatricula());
     }
 }
